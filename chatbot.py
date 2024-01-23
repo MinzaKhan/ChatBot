@@ -1,0 +1,219 @@
+import re 
+import random 
+'''importing the library random so that the code randomly chooses an output from a list of suitable outputs once a match is found.'''
+
+
+name = "" #This variable stores the name of the student.
+major = "" #This variable saves the major of the student.
+pattern_1 = "(My|my) name is (\\w+)" #When the program asks the student their name, it matches the response with this regular expression and saves the name 
+#in the variable "name"
+pattern_2 = "(\\w+)"
+pattern_3 = "(.*)"
+
+'''The function gibberish() is used to detect if the user has input gibberish. It checks this
+by checking if the user has input the same letter more than two times(as no word in english has the same letter thrice).
+It also returns true if the same digit has been input more than 2 times. If this function returns true, the program tells the student not to enter gibberish
+or to try rephrasing the sentence.'''
+def gibberish(user_input):
+    '''The regular expression "([a-zA-Z])\\1{2,}" checks if the same letter has been input more than 2 times in a given string.'''
+    pattern_gibberish1= "([a-zA-Z])\\1{2,}" 
+    '''The regular expression "([0-9])\\1{2,}" checks if the same digit has been input more than 2 times in a given string.'''
+    pattern_gibberish2= "([0-9])\\1{2,}"
+    '''Checking if the input by the user matches the patterns for detecting gibberish.'''
+    if(re.search(pattern_gibberish1, user_input) or re.search(pattern_gibberish2, user_input)): 
+        return True
+    return False
+
+'''The function abusive() checks for abusive language in the input given by the student. It looks for words such as stupid, idiot, disgusting, and tells the 
+student not to use such language if a match is found.'''
+def abusive(user_input):
+    '''The regular expression "(You are (bad|ugly|disgusting|stupid|dumb|silly|jerk))" checks if the student has called the program bad, stupid, dumb, etc. '''
+    pattern_abusive1= "(You are (bad|ugly|disgusting|stupid|dumb|silly|jerk))"
+    '''The regular expression "(stupid|idiot|idiotic)" checks if the words stupid, idiot, or idiotic are present in the 
+    input given by the user. Keyword spotting is being done here. If these words are present anywhere in the input, the function returns true and the program tells the student not to use such language.'''
+    pattern_abusive2 = "(stupid|idiot|idiotic)"
+    if(re.search(pattern_abusive1, user_input) or re.search(pattern_abusive2, user_input) ):
+        return True
+    return False
+'''The following list, "List", contains all the regular expressions that the program tries to match with the input given by the user. 
+The items mentioned first in the list have a higher priority than the items mentioned later, as the program stops as soon as it finds a match.
+If no match is found and the program reaches the end of the list, it matches the sentence to the regular expression ".*?", as this
+regular expression can match with any sentence. It then gives a list of generic responses as it has found no match, such as 
+"Go on.", "Do you enjoy your classes?", "That's interesting.", etc. It also brings up topics from the past conversation by asking specifically about the 
+major of the student, and mentioning their name in the conversation.
+"%1" has been used in the sample outputs to show that the user input will be transformed and given as the output there. For example,
+if the input "I want to know how I can get good marks" is given by the student, it will match the regular expression "I want to know (.*?)(\.|!|,)".
+The output chosen may then be "Why do you want to know %1?". The code will then replace %1 with "how I can get good marks" after transforming it and changing it
+to "how you can get good marks". So the final response given by the program will be "Why do you want to know how you can get good marks?"
+If "%2" is present in the list of possible responses, it will be replaced by the student's major when the program uses it as a response. 
+If "%3" is present in the list of possible responses, it will be replaced by the student's name when the program uses it as a response.  
+'''
+List= [["I am feeling (depressed|anxious|stressed|tired)(.*?)", 
+["Why are you feeling %1?", "The academic year gets stressful sometimes, but I am sure you will be fine!", "Everything will be fine %3.", "Don't lose hope."]], 
+["I am very (depressed|anxious|stressed|tired)(.*?)", ["Why are you %1?", "You sound discouraged.", "Everything will be fine %3.", "Don't lose hope."]],
+["I feel (depressed|anxious|stressed|tired)(.*?)", ["Why are you %1?", "You sound discouraged.", "Everything will be fine %3.", "Don't lose hope."]],
+["I feel very (depressed|anxious|stressed|tired)(.*?)", ["Why are you %1?", "You sound discouraged.", "Everything will be fine %3.", "Don't lose hope."]],
+["(Thanks|thanks|thank you|Thank you)",["You're welcome!", "I am happy that I could help you!", "My pleasure!"]],
+["Sorry|sorry|i apologize|I apologize",["That's alright.", "Don't worry about it!", "I hope you have learnt from your mistakes.", "You don't need to apologize."]],
+["I am (depressed|anxious|stressed|tired)(.*?)", ["Why are you %1?", "You sound discouraged.", "Everything will be fine %3.", "Don't lose hope."]],
+["I love (.*?)(\.|!|,)", ["What do you love about %1?","I am happy to hear that! Tell me more about %1.", "What do you love most about %1?"]],
+["I like (.*?)(\.|!|,)", ["What do you like about %1?","I am happy to hear that! Tell me more about %1.", "What do you like most about %1?"]],
+["I am very (happy|excited)(.*?)", ["I am glad to hear that you are %1!", "That is good to know."]],
+["I feel very (happy|excited)(.*?)", ["I am glad to hear that you are %1!", "That is good to know."]],
+["I feel (happy|excited)(.*?)", ["I am glad to hear that you are %1!", "That is good to know."]],
+["I am (happy|excited)(.*?)", ["I am glad to hear that you are %1!", "That is good to know."]],
+["You are (.*?)(\.|!|,)", ["What makes you think I am %1?", "Why do you think so?"]],
+["I want to know (.*?)(\.|!|,)", ["Why do you want to know %1?", "You should already know %1 if you are serious about your studies."]],
+["\\bYes|yes|yeah|Yeah\\b", ["You sound certain.", "You seem quite positive.", "You are sure."]],
+["\\bNo|no\\b", ["Why not?", "You sound discouraged."]],
+["Not|not", ["Why not?", "You are being negative."]],
+["I hate (.*?)(\.|!|,)", ["You are being very negative.", "Why do you hate %1?", "It is very sad that you hate %1."]],
+["I think (.*?)(\.|!|,)", ["Why do you think so?", "What makes you think %1?"]],
+["I can't (.*?)(\.|!|,)", ["Why do you think you can't %1 ?", "You sound demotivated", "Try harder!", "Why can't you %1?"]],
+["How should|can I (.*?)(\.|!|,|\?)", ["How do you think you should %1?", "You should know how to %1."]],
+["I don't know how to (.*?)(\.|!|,|\?)", ["Why don't you know how to %1?", "Try to find out how that can be done.", "You should know how to %1"]],
+["I don't know (.*?)(\.|!|,|\?)", ["I am concerned that you don't know %1.","That is irresponsible.", "Why don't you know %1?"]],
+["I don't want to (.*?)(\.|!|,)", ["Why don't you want to %1?", "Why so?", "Why not?"]],
+["I don't think (.*?)(\.|!|,)", ["Why do you think so?", "Why so?", "Why not?", "Don't be negative."]],
+["I am (.*?)(\.|!|,|\?)",["Why do you think you are %1?"]],
+["I (.*?) question|Question|ask|Ask", ["Sure, what do you want to ask me?", "Sure, how can I help you?"]],
+["I want (.*?)(\.|!|,)", ["Why do you want %1?"]],
+["\\bstudy\\b",["You should study hard!"]],
+["\\bgraduate\\b", ["Have you thought about what you will do after you graduate?"]],
+["(.*)", ["Tell me more.", "Go on.", "Do you enjoy your classes?", "That's interesting.", "How often do you study?", "What do you like most about %2?", "Do you enjoy studying %2?", "Please go on."]]]
+ 
+'''The list "List_gibberish" contains a set of responses that the program chooses from randomly if a gibberish input is detected.'''
+List_gibberish = ["I cannot understand what you are saying.", "That does not make sense.", "Please do not enter gibberish.", "Could you please rephrase that?"]
+'''The list "List_abusive" contains a set of responses that the program chooses from randomly if abusive language is detected in the input.'''
+List_abusive = ["Please mind your language!", "That's a very rude thing to say!"]
+'''The list "List_transformations" is used to transform the input given by the user so that the program can give the correct output. For example,
+for the input "I don't know how many credits I need to graduate", the output will be "Why don't you know how many credits you need to graduate?".
+Here, the part "how many credits I need to graduate" has been transformed to "how many credits you need to graduate" using the transformation list.'''
+List_transformations = [["I", "you"], ["my", "your"], ["myself", "yourself"], ["am", "are"], ["you", "I"], ["myself", "yourself"], ["are", "am"]]
+'''The program starts by identifying that this is the program Eliza.'''
+
+
+j=""
+'''If "%1" is present in the response chosen by the program, the program tranforms the part of the student input
+that matches the regular expression and gives a response based on that.'''
+x ="%1" 
+'''If "%2" is present in the response chosen by the program, it is replaced by the name of the student.'''
+y ="%2"
+'''If "%3" is present in the response chosen by the program, it is replaced by the major of the student.'''
+a ="%3"
+
+counter=0
+
+
+def get_response(user_input):
+    global counter
+    global x, y, a, name, major
+    if(counter==0):
+        counter = 1
+        if(re.search(pattern_1,user_input)):
+            if(gibberish(user_input)):
+                return random.choice(List_gibberish)
+            elif(abusive(user_input)):
+                return random.choice(List_abusive)
+            else:
+                t = re.search(pattern_1,user_input)
+                name = t.group(2) #The name has been saved and will be brought up in the conversation.
+                '''The program then asks the student's major'''
+                return "Nice to meet you "+t.group(2) +"! What is your major?"
+        else:
+            if(gibberish(user_input)):
+                return random.choice(List_gibberish)
+            elif(abusive(user_input)):
+                return random.choice(List_abusive)
+            else:
+                t = re.search(pattern_2,user_input)
+                name = t.group(1)
+                return "Nice to meet you "+t.group(1)+"! What is your major?"
+    elif(counter ==1):
+        counter = 2
+        t = re.search(pattern_3,user_input)
+        major = t.group(1) #The student's major has been saved and will be brought up in the conversation later.
+        return "That sounds interesting!"
+    else:
+        '''Each time the student gives an input, the program first checks whether the input is gibberish. If it is, the program
+        gives an appropriate response for that and the student enters another input.'''
+        if(gibberish(user_input)):
+            return random.choice(List_gibberish)
+        elif(abusive(user_input)):
+            '''If the input is not gibberish, the program checks if has any abusive language. If the input has abusive language,
+        a response is given based on that and the student is prompted to give an input again.'''
+            return random.choice(List_abusive)
+            '''If the user inputs bye or goodbye, the program gives the response "Bye!".'''
+        elif(re.search("(bye|Bye|goodbye|Goodbye)", user_input)):
+            return "Bye!"
+        
+
+        else:
+            '''If the input is neither gibberish nor abusive, it is matched with the list "List" to check if the input matches any regular expressions there.'''
+            for i, n in List:
+                if(re.search(i,user_input)):
+                    '''If a match is found, a response is chosen randomly from a set of possible responses.'''
+                    j = random.choice(n)
+                    '''Checking if "%1" is present in the response chosen. '''
+                    index = j.find(x)
+                    '''Checking if "%2" is present in the response chosen. '''
+                    index1 = j.find(y)
+                    '''Checking if "%3" is present in the response chosen. '''
+                    index2 = j.find(a)
+                    '''The variable z stores the output of matching the regular expression with the usrr input.'''
+                    z = re.search(i,user_input)
+                    if(index != -1):
+                        num = 0
+                        new_output = ""
+                        '''Transforming the part of the input that matched so that it can be used in the response given by the program.'''
+                        original_input = z.group(1)
+                        new_word = ""
+                        for word in original_input:
+                            for k, l in List_transformations:
+                                if word==k:
+                                    num = 1
+                                    new_word = l
+                                    break
+                            if (num == 1):
+                                new_output = new_output + new_word
+                            else:
+                                new_output = new_output + word
+                            num = 0
+                            new_word = ""
+                        index_1 = index+2
+                        return j[:index] +new_output+j[index_1:]
+                    
+                    elif(index1!=-1):
+                        '''Replacing "%2" with the major of the student in the response.'''
+                        index_1 = index1+2
+                        return j[:index1] +major+j[index_1:]
+                    
+                    elif(index2!=-1):
+                        '''Replacing "%3" with the name of the student in the response.'''
+                        index_1 = index2+2
+                        return j[:index2] +name+j[index_1:]
+                    
+                    else:
+                        '''If "%1", "%2", and "%3" are not present in the output chosen, the program just gives the chosen response as the output with no modifications.'''
+                        return j
+                    '''the loop ends once a match is found so that it does not give multiple responses.'''
+
+
+from flask import Flask, render_template, request
+from flask import jsonify
+app = Flask(__name__)
+app.static_folder = 'static'
+
+@app.route("/")
+def home():
+    return render_template("index.html")
+
+@app.route('/ElizaResponse', methods=['POST']) 
+def ElizaResponse(): 
+    data = request.get_json() #retrieve the data sent from JavaScript 
+    #process the data using Python code 
+    result = get_response(data['value'])
+    return jsonify(result=result)
+
+if __name__ == "__main__":
+    app.run()

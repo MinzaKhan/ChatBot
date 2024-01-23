@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Chatbot</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link rel="stylesheet" href="{{ url_for('static', filename='stylesheet.css') }}">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script> 
+</head> 
+
+<body>
+
+	<div class = "card">
+    <div class = "Header" > <b>Eliza - The Academic Advisor</b></div>
+		<div class = "Chat" id = "Chat" style="overflow-y: scroll;">
+			
+		<div class = "text-left"> 
+			<p style="margin-top: 0px; margin-bottom: 10px;"><b>Eliza</b></p>
+			Hi! I am Eliza, an academic advisor. What is your name? 😄
+		</div>	
+	</div>
+		<div class="inputText">
+		<form class = "input" id = "userInput"  >
+      <input type="text" id="textInput" name = "textInput" style="padding: 3px; width: 90%">
+      <button type="submit" class = "Send">Send</button>
+    </form>
+    
+</div>
+
+	</div>
+	<script type="text/javascript">
+
+	//const chat = document.getElementById("Chat")
+    const userInput = document.getElementById("textInput");
+    const form = document.getElementById("userInput");
+	const log = document.getElementById("log");
+	form.addEventListener("submit", userText);
+ 
+	function userText(event) {
+		event.preventDefault();
+      	const msgText = userInput.value;
+      	if (!msgText) return;
+      	appendText(msgText, "right", "You");
+      	userInput.value = "";
+        $.ajax({ 
+                url: '/ElizaResponse', 
+                type: 'POST', 
+                contentType: 'application/json', 
+                data: JSON.stringify({ 'value': msgText }), 
+                success: function(response) { 
+                    appendText(response.result, "left", "Eliza")
+                }, 
+                error: function(error) { 
+                    console.log(error); 
+                } 
+            });
+
+	};
+
+	function appendText(text, side, name) {
+      	const addText = `
+		<div class="text-${side}">
+		<p style="margin-top: 0px; margin-bottom: 10px;"><b>${name}</b></p>
+		   ${text} 
+		</div>`;
+
+      	Chat.insertAdjacentHTML("beforeend", addText);
+      	var objDiv = document.getElementById("Chat");
+		objDiv.scrollTop = objDiv.scrollHeight;
+  	}
+  	function Eliza(){
+  		appendText("{text}", "left", "Eliza")
+  	}
+      
+	</script>  	
+</body>
